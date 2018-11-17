@@ -26,7 +26,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${FLAGS}")
 
 # Qt5
 find_package(Qt5 REQUIRED COMPONENTS
-    Core Gui Widgets
+    Core
+    Gui
+    Widgets
     )
 
 # Threads
