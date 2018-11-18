@@ -24,13 +24,22 @@ public: // methods
 
     void setView(CView *view);
 
+    void rotate(const QQuaternion &q);
+    QQuaternion getRotation() const;
+
+    void translate(const QVector3D &delta);
+    QVector3D getTranslation() const;
+
+    void scale(float factor);
+    float getScale() const;
+
+    QMatrix4x4 getMVP() const;
+
 public slots:
     void render();
 
 private: // methods
     void initialize();
-
-    float m_fAngle;
 
 private: // fields
     CDataProvider &m_data_provider;
@@ -44,9 +53,12 @@ private: // fields
     QSurfaceFormat m_format;
     QOpenGLContext *m_context;
     QOpenGLShaderProgram *m_program;
-    QOpenGLBuffer m_vbo;
 
     CView *m_view;
+
+    QQuaternion m_rotation;
+    QVector3D m_translation;
+    float m_scale;
 };
 
 } // namespace viz

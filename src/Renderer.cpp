@@ -11,6 +11,7 @@ namespace viz {
 CRenderer::CRenderer(CDataProvider &data_provider)
     : m_data_provider{data_provider}
     , m_initialized(false)
+    , m_scale{1.0f}
 {
     m_format.setDepthBufferSize(16);
 
@@ -22,6 +23,54 @@ CRenderer::CRenderer(CDataProvider &data_provider)
 void CRenderer::setView(CView *view)
 {
     m_view = view;
+}
+
+void CRenderer::rotate(const QQuaternion &q)
+{
+    m_rotation *= q;
+    m_rotation.normalize();
+}
+
+QQuaternion CRenderer::getRotation() const
+{
+    return m_rotation;
+}
+
+void CRenderer::translate(const QVector3D &delta)
+{
+    m_translation += delta;
+}
+
+QVector3D CRenderer::getTranslation() const
+{
+    return m_translation;
+}
+
+void CRenderer::scale(float factor)
+{
+    m_scale *= factor;
+}
+
+float CRenderer::getScale() const
+{
+    return m_scale;
+}
+
+QMatrix4x4 CRenderer::getMVP() const
+{
+    QMatrix4x4 mvp;
+
+    ///@todo Compute View and Projection only once
+
+    mvp.perspective(45, (float)m_view->width() / m_view->height(), 1e-5f, 100);
+
+    mvp.lookAt(QVector3D{0, 0, 3}, QVector3D{0, 0, 0}, QVector3D{0, 1, 0});
+
+    mvp.rotate(m_rotation);
+    mvp.scale(m_scale);
+    mvp.translate(m_translation);
+
+    return mvp;
 }
 
 void CRenderer::render()
@@ -54,48 +103,38 @@ void CRenderer::render()
     f->glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 
     m_program->bind();
-    m_vbo.bind();
 
     m_program->enableAttributeArray(m_vertexAttr);
     m_program->setAttributeBuffer(m_vertexAttr, GL_FLOAT, 0, 3);
 
-    QMatrix4x4 mvp;
+    m_program->setUniformValue(m_matrixUniform, getMVP());
 
-    mvp.perspective(45, (float)m_view->width() / m_view->height(), 1, 100);
-
-    mvp.lookAt(QVector3D{0, 0, -3}, QVector3D{0, 0, 0}, QVector3D{0, 1, 0});
-
-    mvp.rotate(m_fAngle, 0.0f, 1.0f, 0.0f);
-    mvp.rotate(m_fAngle, 1.0f, 0.0f, 0.0f);
-    mvp.rotate(m_fAngle, 0.0f, 0.0f, 1.0f);
-    // mvp.translate(0.0f, -0.2f, 0.0f);
-    static float c_scale = 1.0;
-    mvp.scale(QVector3D{c_scale, c_scale, c_scale});
-
-    m_program->setUniformValue(m_matrixUniform, mvp);
-
-    f->glLineWidth(2);
+    static constexpr float c_ref_scale = 0.2f;
 
     m_program->setUniformValue(m_colorUniform, QColor{Qt::red});
+    f->glLineWidth(2);
     f->glBegin(GL_LINES);
-    f->glVertex3f(0, 0, 0);
-    f->glVertex3f(0.2, 0, 0);
+    f->glVertex3f(0.0f, 0.0f, 0.0f);
+    f->glVertex3f(c_ref_scale, 0.0f, 0.0f);
     f->glEnd();
 
     m_program->setUniformValue(m_colorUniform, QColor{Qt::green});
+    f->glLineWidth(2);
     f->glBegin(GL_LINES);
-    f->glVertex3f(0, 0, 0);
-    f->glVertex3f(0, 0.2, 0);
+    f->glVertex3f(0.0f, 0.0f, 0.0f);
+    f->glVertex3f(0.0f, c_ref_scale, 0.0f);
     f->glEnd();
 
     m_program->setUniformValue(m_colorUniform, QColor{Qt::blue});
+    f->glLineWidth(2);
     f->glBegin(GL_LINES);
-    f->glVertex3f(0, 0, 0);
-    f->glVertex3f(0, 0, 0.2);
+    f->glVertex3f(0.0f, 0.0f, 0.0f);
+    f->glVertex3f(0.0f, 0.0f, c_ref_scale);
     f->glEnd();
 
     m_program->setUniformValue(m_colorUniform, QColor{Qt::white});
 
+    f->glLineWidth(2);
     f->glBegin(GL_LINE_STRIP);
 
     {
@@ -110,8 +149,6 @@ void CRenderer::render()
     f->glEnd();
 
     m_context->swapBuffers(m_view);
-
-    m_fAngle += 1.0f;
 
     QTimer::singleShot(16, this, &CRenderer::render);
 }
@@ -133,14 +170,6 @@ void CRenderer::initialize()
     m_vertexAttr = m_program->attributeLocation("vertex");
     m_matrixUniform = m_program->uniformLocation("mvp");
     m_colorUniform = m_program->uniformLocation("color");
-
-    m_fAngle = 0;
-
-    m_vbo.create();
-    m_vbo.bind();
-    const int verticesSize = m_vertices.count() * 3 * sizeof(GLfloat);
-    m_vbo.allocate(verticesSize * 2);
-    m_vbo.write(0, m_vertices.constData(), verticesSize);
 }
 
 } // namespace viz
