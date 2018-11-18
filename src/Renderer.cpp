@@ -68,7 +68,7 @@ void CRenderer::render()
     mvp.rotate(m_fAngle, 0.0f, 1.0f, 0.0f);
     mvp.rotate(m_fAngle, 1.0f, 0.0f, 0.0f);
     mvp.rotate(m_fAngle, 0.0f, 0.0f, 1.0f);
-    mvp.translate(0.0f, -0.2f, 0.0f);
+    // mvp.translate(0.0f, -0.2f, 0.0f);
     static float c_scale = 1.0;
     mvp.scale(QVector3D{c_scale, c_scale, c_scale});
 
