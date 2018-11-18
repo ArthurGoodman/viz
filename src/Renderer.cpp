@@ -73,10 +73,28 @@ void CRenderer::render()
     mvp.scale(QVector3D{c_scale, c_scale, c_scale});
 
     m_program->setUniformValue(m_matrixUniform, mvp);
-    m_program->setUniformValue(m_colorUniform, QColor{Qt::white});
 
     f->glLineWidth(2);
-    // f->glDrawArrays(GL_POINTS, 0, m_vertices.size());
+
+    m_program->setUniformValue(m_colorUniform, QColor{Qt::red});
+    f->glBegin(GL_LINES);
+    f->glVertex3f(0, 0, 0);
+    f->glVertex3f(0.2, 0, 0);
+    f->glEnd();
+
+    m_program->setUniformValue(m_colorUniform, QColor{Qt::green});
+    f->glBegin(GL_LINES);
+    f->glVertex3f(0, 0, 0);
+    f->glVertex3f(0, 0.2, 0);
+    f->glEnd();
+
+    m_program->setUniformValue(m_colorUniform, QColor{Qt::blue});
+    f->glBegin(GL_LINES);
+    f->glVertex3f(0, 0, 0);
+    f->glVertex3f(0, 0, 0.2);
+    f->glEnd();
+
+    m_program->setUniformValue(m_colorUniform, QColor{Qt::white});
 
     f->glBegin(GL_LINE_STRIP);
 
