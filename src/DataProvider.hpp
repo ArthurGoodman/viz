@@ -5,14 +5,14 @@
 #include <mutex>
 #include <thread>
 #include <vector>
-#include <QtGui/QVector2D>
+#include <QtGui/QVector3D>
 
 namespace viz {
 
 class CDataProvider final
 {
 public: // types
-    using DataType = QVector2D;
+    using DataType = QVector3D;
     using ContainerType = std::vector<DataType>;
     using iterator = ContainerType::iterator;
 

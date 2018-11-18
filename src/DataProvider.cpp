@@ -44,13 +44,14 @@ void CDataProvider::inputThread()
     {
         float x = 0.0f;
         float y = 0.0f;
+        float z = 0.0f;
 
-        std::cin >> x >> y;
+        std::cin >> x >> y >> z;
 
         if (std::cin)
         {
             std::unique_lock<std::mutex> guard{m_mutex};
-            m_data.emplace_back(x, y);
+            m_data.emplace_back(x, y, z);
         }
     }
 }
