@@ -145,10 +145,8 @@ void CRenderer::render()
     f->glEnd();
 
     m_program->setUniformValue(m_colorUniform, QColor{Qt::white});
-
     f->glLineWidth(2);
     f->glBegin(GL_LINE_STRIP);
-
     {
         std::unique_lock<CDataProvider> guard{m_data_provider};
 
@@ -157,7 +155,21 @@ void CRenderer::render()
             f->glVertex3f(point.x(), point.y(), point.z());
         }
     }
+    f->glEnd();
 
+    QMatrix4x4 view_projection = getViewProjection();
+    view_projection.scale(1.0f / m_scale);
+    m_program->setUniformValue(m_matrixUniform, view_projection);
+
+    static constexpr float c_crosshair_scale = 0.5f;
+
+    m_program->setUniformValue(m_colorUniform, QColor{Qt::yellow});
+    f->glLineWidth(2);
+    f->glBegin(GL_LINES);
+    f->glVertex3f(0.0f, 0.0f, 0.0f);
+    f->glVertex3f(c_crosshair_scale, 0.0f, 0.0f);
+    f->glVertex3f(0.0f, 0.0f, 0.0f);
+    f->glVertex3f(0.0f, c_crosshair_scale, 0.0f);
     f->glEnd();
 
     m_context->swapBuffers(m_view);
