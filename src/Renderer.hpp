@@ -33,6 +33,7 @@ public: // methods
     void scale(float factor);
     float getScale() const;
 
+    QMatrix4x4 getViewProjection() const;
     QMatrix4x4 getMVP() const;
 
 public slots:

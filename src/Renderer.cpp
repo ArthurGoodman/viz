@@ -56,18 +56,30 @@ float CRenderer::getScale() const
     return m_scale;
 }
 
+QMatrix4x4 CRenderer::getViewProjection() const
+{
+    QMatrix4x4 view_projection;
+
+    static constexpr float c_fov = 45.0f;
+    static constexpr float c_z_near = 1e-5f;
+    static constexpr float c_z_far = 1e5f;
+    static constexpr float c_camera_height = 10.0f;
+
+    view_projection.perspective(
+        c_fov, (float)m_view->width() / m_view->height(), c_z_near, c_z_far);
+    view_projection.lookAt(
+        QVector3D{0, 0, c_camera_height / m_scale},
+        QVector3D{0, 0, 0},
+        QVector3D{0, 1, 0});
+
+    return view_projection;
+}
+
 QMatrix4x4 CRenderer::getMVP() const
 {
-    QMatrix4x4 mvp;
-
-    ///@todo Compute View and Projection only once
-
-    mvp.perspective(45, (float)m_view->width() / m_view->height(), 1e-5f, 100);
-
-    mvp.lookAt(QVector3D{0, 0, 3}, QVector3D{0, 0, 0}, QVector3D{0, 1, 0});
+    QMatrix4x4 mvp = getViewProjection();
 
     mvp.rotate(m_rotation);
-    mvp.scale(m_scale);
     mvp.translate(m_translation);
 
     return mvp;
@@ -109,7 +121,7 @@ void CRenderer::render()
 
     m_program->setUniformValue(m_matrixUniform, getMVP());
 
-    static constexpr float c_ref_scale = 0.2f;
+    static constexpr float c_ref_scale = 1.0f;
 
     m_program->setUniformValue(m_colorUniform, QColor{Qt::red});
     f->glLineWidth(2);
