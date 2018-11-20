@@ -108,18 +108,15 @@ void CView::mouseMoveEvent(QMouseEvent *e)
 
 void CView::wheelEvent(QWheelEvent *e)
 {
-    static constexpr float c_speed_multiplier = 1.1f;
-    static constexpr float c_wheel_speed = 120.0f;
-
-    float scale_factor = e->delta() / c_wheel_speed * c_speed_multiplier;
+    static constexpr float c_scale_factor = 1.1f;
 
     if (e->delta() > 0)
     {
-        m_renderer.scale(scale_factor);
+        m_renderer.scale(c_scale_factor);
     }
     else
     {
-        m_renderer.scale(1.0f / -scale_factor);
+        m_renderer.scale(1.0f / c_scale_factor);
     }
 }
 
