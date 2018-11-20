@@ -1,6 +1,7 @@
 #include "DataProvider.hpp"
 #include <functional>
 #include <iostream>
+#include <sstream>
 #include <thread>
 
 namespace viz {
@@ -8,6 +9,7 @@ namespace viz {
 CDataProvider::CDataProvider()
     : m_input_thread{std::bind(&CDataProvider::inputThread, this)}
 {
+    m_data.push_back(ContainerType());
 }
 
 CDataProvider::~CDataProvider()
@@ -40,18 +42,27 @@ void CDataProvider::unlock()
 
 void CDataProvider::inputThread()
 {
-    while (std::cin)
+    std::string line;
+    while (std::getline(std::cin, line))
     {
+        if (line == "+")
+        {
+            std::unique_lock<std::mutex> guard{m_mutex};
+            m_data.push_back(ContainerType());
+        }
+
+        std::stringstream ss{line};
+
         float x = 0.0f;
         float y = 0.0f;
         float z = 0.0f;
 
-        std::cin >> x >> y >> z;
+        ss >> x >> y >> z;
 
-        if (std::cin)
+        if (ss)
         {
             std::unique_lock<std::mutex> guard{m_mutex};
-            m_data.emplace_back(x, y, z);
+            m_data.back().emplace_back(x, y, z);
         }
     }
 }
