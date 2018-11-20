@@ -1,9 +1,16 @@
 #!/usr/bin/env python3
 
 import random
+import time
 
-c_range = 1e-3
-c_dt = 1e-4
+
+c_range = 1
+c_dt = 1e-2
+
+
+def rand():
+    return random.uniform(-c_range, c_range)
+
 
 def main():
     pos = [0.0, 0.0, 0.0]
@@ -11,15 +18,17 @@ def main():
 
     while True:
         print("{0} {1} {2}".format(pos[0], pos[1], pos[2]))
-        delta = (random.uniform(-c_range, c_range),
-                 random.uniform(-c_range, c_range),
-                 random.uniform(-c_range, c_range))
+
+        delta = (rand(), rand(), rand())
+
         pos[0] += vel[0] * c_dt
         pos[1] += vel[1] * c_dt
         pos[2] += vel[2] * c_dt
         vel[0] += delta[0]
         vel[1] += delta[1]
         vel[2] += delta[2]
+
+        time.sleep(c_dt)
 
 
 if __name__ == "__main__":
