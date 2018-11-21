@@ -36,6 +36,10 @@ public: // methods
     QMatrix4x4 getViewProjection() const;
     QMatrix4x4 getMVP() const;
 
+    QVector3D getEye() const;
+    QVector3D getCenter() const;
+    QVector3D getUp() const;
+
 public slots:
     void render();
 

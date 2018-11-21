@@ -65,14 +65,10 @@ QMatrix4x4 CRenderer::getViewProjection() const
     static constexpr float c_fov = 45.0f;
     static constexpr float c_z_near = 1e-5f;
     static constexpr float c_z_far = 1e5f;
-    static constexpr float c_camera_height = 10.0f;
 
     view_projection.perspective(
         c_fov, (float)m_view->width() / m_view->height(), c_z_near, c_z_far);
-    view_projection.lookAt(
-        QVector3D{0, 0, c_camera_height / m_scale},
-        QVector3D{0, 0, 0},
-        QVector3D{0, 1, 0});
+    view_projection.lookAt(getEye(), getCenter(), getUp());
 
     return view_projection;
 }
@@ -85,6 +81,25 @@ QMatrix4x4 CRenderer::getMVP() const
     mvp.translate(m_translation);
 
     return mvp;
+}
+
+QVector3D CRenderer::getEye() const
+{
+    static constexpr float c_camera_distance = 10.0f;
+    const QVector3D c_eye{0, 0, c_camera_distance / m_scale};
+    return c_eye;
+}
+
+QVector3D CRenderer::getCenter() const
+{
+    static constexpr QVector3D c_center{0.0f, 0.0f, 0.0f};
+    return c_center;
+}
+
+QVector3D CRenderer::getUp() const
+{
+    static constexpr QVector3D c_up{0.0f, 1.0f, 0.0f};
+    return c_up;
 }
 
 void CRenderer::render()
@@ -201,4 +216,3 @@ void CRenderer::initialize()
 }
 
 } // namespace viz
-

@@ -77,27 +77,31 @@ void CView::mouseMoveEvent(QMouseEvent *e)
 
         QQuaternion rot_conj = m_renderer.getRotation().conjugate();
 
-        QVector3D x_axis = rot_conj * QVector3D{1.0f, 0.0f, 0.0f};
-        QVector3D y_axis = rot_conj * QVector3D{0.0f, 1.0f, 0.0f};
+        QVector3D view_dir =
+            (m_renderer.getCenter() - m_renderer.getEye()).normalized();
+        QVector3D up = m_renderer.getUp().normalized();
+
+        QVector3D horizontal_axis =
+            rot_conj * QVector3D::crossProduct(view_dir, up);
+        QVector3D vertical_axis = rot_conj * m_renderer.getUp();
 
         if (e->modifiers() & Qt::ShiftModifier)
         {
             QMatrix4x4 view_projection = m_renderer.getViewProjection();
 
-            float sensitivity =
-                2.0f / height() / view_projection(1, 1) * view_projection(3, 3);
+            float sensitivity = 2.0f / height() / (view_projection * up).y();
 
-            m_renderer.translate(sensitivity * delta_x * x_axis);
-            m_renderer.translate(sensitivity * -delta_y * y_axis);
+            m_renderer.translate(sensitivity * delta_x * horizontal_axis);
+            m_renderer.translate(sensitivity * -delta_y * vertical_axis);
         }
         else
         {
             float sensitivity = 180.0f / height();
 
-            QQuaternion q_x =
-                QQuaternion::fromAxisAndAngle(x_axis, sensitivity * delta_y);
-            QQuaternion q_y =
-                QQuaternion::fromAxisAndAngle(y_axis, sensitivity * delta_x);
+            QQuaternion q_x = QQuaternion::fromAxisAndAngle(
+                horizontal_axis, sensitivity * delta_y);
+            QQuaternion q_y = QQuaternion::fromAxisAndAngle(
+                vertical_axis, sensitivity * delta_x);
 
             m_renderer.rotate(q_x * q_y);
         }
