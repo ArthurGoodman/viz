@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <cstddef>
 #include <memory>
 #include <mutex>
@@ -33,6 +34,7 @@ private: // fields
     std::mutex m_mutex;
     std::thread m_input_thread;
     std::vector<ContainerType> m_data;
+    std::atomic_bool m_stopped;
 };
 
 } // namespace viz

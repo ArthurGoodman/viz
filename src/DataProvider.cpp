@@ -8,16 +8,15 @@ namespace viz {
 
 CDataProvider::CDataProvider()
     : m_input_thread{std::bind(&CDataProvider::inputThread, this)}
+    , m_stopped{false}
 {
     m_data.push_back(ContainerType());
 }
 
 CDataProvider::~CDataProvider()
 {
-    if (m_input_thread.joinable())
-    {
-        m_input_thread.detach();
-    }
+    m_stopped.store(true);
+    m_input_thread.join();
 }
 
 CDataProvider::iterator CDataProvider::begin()
@@ -43,7 +42,7 @@ void CDataProvider::unlock()
 void CDataProvider::inputThread()
 {
     std::string line;
-    while (std::getline(std::cin, line))
+    while (!m_stopped.load() && std::getline(std::cin, line))
     {
         if (line == "+")
         {
