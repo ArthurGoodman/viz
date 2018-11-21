@@ -13,6 +13,8 @@ CRenderer::CRenderer(CDataProvider &data_provider)
     , m_initialized(false)
     , m_scale{1.0f}
 {
+    static constexpr std::size_t c_samples = 4;
+    m_format.setSamples(c_samples);
     m_format.setDepthBufferSize(16);
 
     m_context = new QOpenGLContext(this);
@@ -107,12 +109,11 @@ void CRenderer::render()
         viewSize.height() * m_view->devicePixelRatio());
     f->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    f->glClearColor(0, 0, 0, 0);
-    f->glFrontFace(GL_CW);
-    f->glCullFace(GL_FRONT);
-    f->glEnable(GL_CULL_FACE);
+    static constexpr float c_bg_color = 0.123;
+    f->glClearColor(c_bg_color, c_bg_color, c_bg_color, 0);
     f->glEnable(GL_DEPTH_TEST);
     f->glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+    f->glEnable(GL_MULTISAMPLE);
 
     m_program->bind();
 
