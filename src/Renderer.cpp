@@ -4,6 +4,9 @@
 #include <QtCore/QTimer>
 #include <QtGui/QOpenGLContext>
 #include <QtGui/QOpenGLFunctions_2_0>
+#include <QtGui/QOpenGLPaintDevice>
+#include <QtGui/QPainter>
+#include <QtGui/QPainterPath>
 #include "View.hpp"
 
 namespace viz {
@@ -102,6 +105,19 @@ QVector3D CRenderer::getUp() const
     return c_up;
 }
 
+void CRenderer::toggleRecording()
+{
+    m_recording = !m_recording;
+    if (m_recording)
+    {
+        m_recording_time.restart();
+    }
+}
+
+void CRenderer::clear()
+{
+}
+
 void CRenderer::render()
 {
     if (!m_context->makeCurrent(m_view))
@@ -190,6 +206,29 @@ void CRenderer::render()
     f->glVertex3f(0.0f, 0.0f, 0.0f);
     f->glVertex3f(0.0f, c_crosshair_scale, 0.0f);
     f->glEnd();
+
+    if (m_recording)
+    {
+        QOpenGLPaintDevice device(m_view->size());
+
+        QPainter p(&device);
+        p.setRenderHint(QPainter::Antialiasing);
+
+        QFont font = p.font();
+        font.setPixelSize(25);
+        p.setFont(font);
+
+        p.setPen(Qt::white);
+
+        p.drawText(QRect{10, 0, 50, 50}, Qt::AlignVCenter, "REC");
+
+        if (m_recording_time.elapsed() / 750 % 2 == 0)
+        {
+            QPainterPath path;
+            path.addEllipse(QRect{70, 13, 23, 23});
+            p.fillPath(path, Qt::red);
+        }
+    }
 
     m_context->swapBuffers(m_view);
 

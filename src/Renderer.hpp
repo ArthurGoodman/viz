@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QtCore/QTime>
 #include <QtGui/QOpenGLBuffer>
 #include <QtGui/QOpenGLShaderProgram>
 #include <QtGui/QScreen>
@@ -40,6 +41,9 @@ public: // methods
     QVector3D getCenter() const;
     QVector3D getUp() const;
 
+    void toggleRecording();
+    void clear();
+
 public slots:
     void render();
 
@@ -64,6 +68,9 @@ private: // fields
     QQuaternion m_rotation;
     QVector3D m_translation;
     float m_scale;
+
+    bool m_recording = false;
+    QTime m_recording_time;
 };
 
 } // namespace viz

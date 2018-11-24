@@ -57,6 +57,14 @@ void CView::keyPressEvent(QKeyEvent *e)
     case Qt::Key_Q:
         close();
         break;
+
+    case Qt::Key_C:
+        m_renderer.clear();
+        break;
+
+    case Qt::Key_Return:
+        m_renderer.toggleRecording();
+        break;
     }
 }
 
