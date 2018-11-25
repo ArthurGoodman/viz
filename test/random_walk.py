@@ -17,7 +17,9 @@ def main():
     vel = [0.0, 0.0, 0.0]
 
     while True:
-        print("{0} {1} {2}".format(pos[0], pos[1], pos[2]))
+        print("p {0} {1} {2}".format(pos[0], pos[1], pos[2]))
+        print("r {0} {1} {2} {3}".format(pos[0], pos[1], pos[2], 0))
+        print("#comment")
 
         delta = (rand(), rand(), rand())
 

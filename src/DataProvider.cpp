@@ -1,8 +1,10 @@
 #include "DataProvider.hpp"
+#include <fstream>
 #include <functional>
 #include <iostream>
 #include <sstream>
 #include <thread>
+#include <QtCore/QTime>
 
 namespace viz {
 
@@ -10,7 +12,6 @@ CDataProvider::CDataProvider()
     : m_input_thread{std::bind(&CDataProvider::inputThread, this)}
     , m_stopped{false}
 {
-    m_data.push_back(ContainerType());
 }
 
 CDataProvider::~CDataProvider()
@@ -21,12 +22,12 @@ CDataProvider::~CDataProvider()
 
 CDataProvider::iterator CDataProvider::begin()
 {
-    return m_data.begin();
+    return m_positions.begin();
 }
 
 CDataProvider::iterator CDataProvider::end()
 {
-    return m_data.end();
+    return m_positions.end();
 }
 
 void CDataProvider::lock()
@@ -39,29 +40,106 @@ void CDataProvider::unlock()
     m_mutex.unlock();
 }
 
+void CDataProvider::toggleRecording()
+{
+    if (m_recording)
+    {
+        std::unique_lock<std::mutex> guard{m_mutex};
+
+        std::string dump_name = "./logs/" +
+                                QDateTime::currentDateTime()
+                                    .toString(Qt::DateFormat::ISODate)
+                                    .toStdString() +
+                                ".log";
+
+        std::ofstream file(dump_name);
+
+        std::size_t i = 0;
+        for (; i < m_positions.size() && i < m_rotations.size(); i++)
+        {
+            const auto &pos = m_positions.at(i);
+            const auto &rot = m_rotations.at(i);
+            file << "p " << pos.x() << " " << pos.y() << " " << pos.z()
+                 << std::endl;
+            file << "r " << rot.scalar() << " " << rot.x() << " " << rot.y()
+                 << " " << rot.z() << std::endl;
+        }
+        if (i == m_positions.size())
+        {
+            for (; i < m_rotations.size(); i++)
+            {
+                const auto &rot = m_rotations.at(i);
+                file << "r " << rot.scalar() << " " << rot.x() << " " << rot.y()
+                     << " " << rot.z() << std::endl;
+            }
+        }
+        else
+        {
+            for (; i < m_positions.size(); i++)
+            {
+                const auto &pos = m_positions.at(i);
+                file << "p " << pos.x() << " " << pos.y() << " " << pos.z()
+                     << std::endl;
+            }
+        }
+
+        std::cout << "Dump '" << dump_name << "' saved!" << std::endl;
+    }
+
+    m_recording = !m_recording;
+}
+
+void CDataProvider::clear()
+{
+    std::unique_lock<std::mutex> guard{m_mutex};
+    m_positions.clear();
+    m_rotations.clear();
+}
+
 void CDataProvider::inputThread()
 {
     std::string line;
     while (!m_stopped.load() && std::getline(std::cin, line))
     {
-        if (line == "+")
-        {
-            std::unique_lock<std::mutex> guard{m_mutex};
-            m_data.push_back(ContainerType());
-        }
+        std::unique_lock<std::mutex> guard{m_mutex};
+
+        // if (line == "+")
+        // {
+        //     std::unique_lock<std::mutex> guard{m_mutex};
+        //     m_positions.push_back(ContainerType());
+        // }
 
         std::stringstream ss{line};
 
-        float x = 0.0f;
-        float y = 0.0f;
-        float z = 0.0f;
+        std::string type;
+        ss >> type;
 
-        ss >> x >> y >> z;
-
-        if (ss)
+        if (type == "p")
         {
-            std::unique_lock<std::mutex> guard{m_mutex};
-            m_data.back().emplace_back(x, y, z);
+            float x = 0.0f;
+            float y = 0.0f;
+            float z = 0.0f;
+
+            ss >> x >> y >> z;
+
+            if (ss)
+            {
+                m_positions.emplace_back(x, y, z);
+            }
+        }
+        else if (type == "r")
+        {
+            float w = 0.0f;
+            float x = 0.0f;
+            float y = 0.0f;
+            float z = 0.0f;
+
+            ss >> w >> x >> y >> z;
+
+            if (ss)
+            {
+                m_rotations.emplace_back(w, x, y, z);
+            }
         }
     }
 }

@@ -110,12 +110,16 @@ void CRenderer::toggleRecording()
     m_recording = !m_recording;
     if (m_recording)
     {
+        m_data_provider.clear();
         m_recording_time.restart();
     }
+
+    m_data_provider.toggleRecording();
 }
 
 void CRenderer::clear()
 {
+    m_data_provider.clear();
 }
 
 void CRenderer::render()
@@ -181,15 +185,12 @@ void CRenderer::render()
     {
         std::unique_lock<CDataProvider> guard{m_data_provider};
 
-        for (const auto &segment : m_data_provider)
+        f->glBegin(GL_LINE_STRIP);
+        for (const auto &point : m_data_provider)
         {
-            f->glBegin(GL_LINE_STRIP);
-            for (const auto &point : segment)
-            {
-                f->glVertex3f(point.x(), point.y(), point.z());
-            }
-            f->glEnd();
+            f->glVertex3f(point.x(), point.y(), point.z());
         }
+        f->glEnd();
     }
 
     QMatrix4x4 view_projection = getViewProjection();
