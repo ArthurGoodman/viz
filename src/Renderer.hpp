@@ -43,6 +43,7 @@ public: // methods
 
     void toggleRecording();
     void clear();
+    void mark();
 
 public slots:
     void render();

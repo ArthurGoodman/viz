@@ -122,6 +122,11 @@ void CRenderer::clear()
     m_data_provider.clear();
 }
 
+void CRenderer::mark()
+{
+    m_data_provider.mark();
+}
+
 void CRenderer::render()
 {
     if (!m_context->makeCurrent(m_view))

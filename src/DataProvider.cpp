@@ -82,6 +82,10 @@ void CDataProvider::toggleRecording()
                      << std::endl;
             }
         }
+        for (const auto &m : m_marks)
+        {
+            file << "#mark " << m << std::endl;
+        }
 
         std::cout << "Dump '" << dump_name << "' saved!" << std::endl;
     }
@@ -94,6 +98,15 @@ void CDataProvider::clear()
     std::unique_lock<std::mutex> guard{m_mutex};
     m_positions.clear();
     m_rotations.clear();
+    m_marks.clear();
+}
+
+void CDataProvider::mark()
+{
+    std::unique_lock<std::mutex> guard{m_mutex};
+    std::size_t m = m_positions.size() - 1;
+    m_marks.emplace_back(m);
+    std::cout << "Mark " << m << " placed!" << std::endl;
 }
 
 void CDataProvider::inputThread()

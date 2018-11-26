@@ -30,6 +30,7 @@ public: // methods
 
     void toggleRecording();
     void clear();
+    void mark();
 
 private: // methods
     void inputThread();
@@ -39,6 +40,7 @@ private: // fields
     std::thread m_input_thread;
     ContainerType m_positions;
     std::vector<QQuaternion> m_rotations;
+    std::vector<std::size_t> m_marks;
     std::atomic_bool m_stopped;
     bool m_recording = false;
 };

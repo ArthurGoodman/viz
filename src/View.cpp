@@ -65,6 +65,10 @@ void CView::keyPressEvent(QKeyEvent *e)
     case Qt::Key_Return:
         m_renderer.toggleRecording();
         break;
+
+    case Qt::Key_Space:
+        m_renderer.mark();
+        break;
     }
 }
 
