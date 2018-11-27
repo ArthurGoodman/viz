@@ -190,12 +190,15 @@ void CRenderer::render()
     {
         std::unique_lock<CDataProvider> guard{m_data_provider};
 
-        f->glBegin(GL_LINE_STRIP);
-        for (const auto &point : m_data_provider)
+        for (const auto &segment : m_data_provider)
         {
-            f->glVertex3f(point.x(), point.y(), point.z());
+            f->glBegin(GL_LINE_STRIP);
+            for (const auto &point : segment)
+            {
+                f->glVertex3f(point.x(), point.y(), point.z());
+            }
+            f->glEnd();
         }
-        f->glEnd();
     }
 
     QMatrix4x4 view_projection = getViewProjection();

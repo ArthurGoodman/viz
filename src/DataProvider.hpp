@@ -16,7 +16,7 @@ class CDataProvider final
 public: // types
     using DataType = QVector3D;
     using ContainerType = std::vector<DataType>;
-    using iterator = ContainerType::iterator;
+    using iterator = std::vector<ContainerType>::iterator;
 
 public: // methods
     explicit CDataProvider();
@@ -38,7 +38,7 @@ private: // methods
 private: // fields
     std::mutex m_mutex;
     std::thread m_input_thread;
-    ContainerType m_positions;
+    std::vector<ContainerType> m_positions;
     std::vector<QQuaternion> m_rotations;
     std::vector<std::size_t> m_marks;
     std::atomic_bool m_stopped;

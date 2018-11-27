@@ -12,6 +12,8 @@ CDataProvider::CDataProvider()
     : m_input_thread{std::bind(&CDataProvider::inputThread, this)}
     , m_stopped{false}
 {
+    std::unique_lock<std::mutex> guard{m_mutex};
+    m_positions.push_back(ContainerType());
 }
 
 CDataProvider::~CDataProvider()
@@ -57,7 +59,7 @@ void CDataProvider::toggleRecording()
         std::size_t i = 0;
         for (; i < m_positions.size() && i < m_rotations.size(); i++)
         {
-            const auto &pos = m_positions.at(i);
+            const auto &pos = m_positions.front().at(i);
             const auto &rot = m_rotations.at(i);
             file << "p " << pos.x() << " " << pos.y() << " " << pos.z()
                  << std::endl;
@@ -77,7 +79,7 @@ void CDataProvider::toggleRecording()
         {
             for (; i < m_positions.size(); i++)
             {
-                const auto &pos = m_positions.at(i);
+                const auto &pos = m_positions.front().at(i);
                 file << "p " << pos.x() << " " << pos.y() << " " << pos.z()
                      << std::endl;
             }
@@ -116,13 +118,11 @@ void CDataProvider::inputThread()
     std::string line;
     while (!m_stopped.load() && std::getline(std::cin, line))
     {
-        std::unique_lock<std::mutex> guard{m_mutex};
-
-        // if (line == "+")
-        // {
-        //     std::unique_lock<std::mutex> guard{m_mutex};
-        //     m_positions.push_back(ContainerType());
-        // }
+        if (line == "+")
+        {
+            std::unique_lock<std::mutex> guard{m_mutex};
+            m_positions.push_back(ContainerType());
+        }
 
         std::stringstream ss{line};
 
@@ -139,7 +139,8 @@ void CDataProvider::inputThread()
 
             if (ss)
             {
-                m_positions.emplace_back(x, y, z);
+                std::unique_lock<std::mutex> guard{m_mutex};
+                m_positions.back().emplace_back(x, y, z);
             }
         }
         else if (type == "r")
