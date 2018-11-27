@@ -88,6 +88,7 @@ void CDataProvider::toggleRecording()
         }
 
         std::cout << "Dump '" << dump_name << "' saved!" << std::endl;
+        std::cout << m_marks.size() << " marks." << std::endl;
     }
 
     m_recording = !m_recording;
@@ -106,7 +107,8 @@ void CDataProvider::mark()
     std::unique_lock<std::mutex> guard{m_mutex};
     std::size_t m = m_positions.size() - 1;
     m_marks.emplace_back(m);
-    std::cout << "Mark " << m << " placed!" << std::endl;
+    std::cout << "Mark " << m << " placed! " << (m_marks.size() - 1) % 2
+              << std::endl;
 }
 
 void CDataProvider::inputThread()
