@@ -83,7 +83,7 @@ void CView::mouseMoveEvent(QMouseEvent *e)
 
         QVector3D horizontal_axis =
             rot_conj * QVector3D::crossProduct(view_dir, up);
-        QVector3D vertical_axis = rot_conj * m_renderer.getUp();
+        QVector3D vertical_axis = rot_conj * up;
 
         if (e->modifiers() & Qt::ShiftModifier)
         {
@@ -93,6 +93,33 @@ void CView::mouseMoveEvent(QMouseEvent *e)
 
             m_renderer.translate(sensitivity * delta_x * horizontal_axis);
             m_renderer.translate(sensitivity * -delta_y * vertical_axis);
+        }
+        else if (e->modifiers() & Qt::ControlModifier)
+        {
+            if (delta_x != 0 || delta_y != 0)
+            {
+                QVector3D window_center{width() / 2.0f, height() / 2.0f, 0.0f};
+
+                QVector3D a =
+                    (QVector3D{m_prev_pos} - window_center).normalized();
+                QVector3D b =
+                    (QVector3D{e->pos()} - window_center).normalized();
+
+                QVector3D n = rot_conj * view_dir;
+
+                float angle =
+                    std::acos(QVector3D::dotProduct(a, b)) * 180.0f / M_PI;
+
+                if (QVector3D::dotProduct(
+                        view_dir, QVector3D::crossProduct(a, b)) > 0)
+                {
+                    angle *= -1;
+                }
+
+                QQuaternion q_z = QQuaternion::fromAxisAndAngle(n, angle);
+
+                m_renderer.rotate(q_z);
+            }
         }
         else
         {
