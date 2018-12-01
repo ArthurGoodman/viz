@@ -105,10 +105,10 @@ void CView::mouseMoveEvent(QMouseEvent *e)
                 QVector3D b =
                     (QVector3D{e->pos()} - window_center).normalized();
 
-                QVector3D n = rot_conj * view_dir;
-
                 float angle =
-                    std::acos(QVector3D::dotProduct(a, b)) * 180.0f / M_PI;
+                    std::acos(std::max(
+                        -1.0f, std::min(QVector3D::dotProduct(a, b), 1.0f))) *
+                    180.0f / M_PI;
 
                 if (QVector3D::dotProduct(
                         view_dir, QVector3D::crossProduct(a, b)) > 0)
@@ -116,7 +116,8 @@ void CView::mouseMoveEvent(QMouseEvent *e)
                     angle *= -1;
                 }
 
-                QQuaternion q_z = QQuaternion::fromAxisAndAngle(n, angle);
+                QQuaternion q_z =
+                    QQuaternion::fromAxisAndAngle(rot_conj * view_dir, angle);
 
                 m_renderer.rotate(q_z);
             }
