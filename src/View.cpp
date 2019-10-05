@@ -75,7 +75,7 @@ void CView::mouseMoveEvent(QMouseEvent *e)
         int delta_x = e->x() - m_prev_pos.x();
         int delta_y = e->y() - m_prev_pos.y();
 
-        QQuaternion rot_conj = m_renderer.getRotation().conjugate();
+        QQuaternion rot_conj = m_renderer.getRotation().conjugated();
 
         QVector3D view_dir =
             (m_renderer.getCenter() - m_renderer.getEye()).normalized();
